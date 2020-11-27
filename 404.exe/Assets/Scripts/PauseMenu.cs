@@ -20,6 +20,12 @@ public class PauseMenu : MonoBehaviour
         SceneManager.LoadScene("Main Menu");
     }
 
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Unpause();
+    }
+
     public void QuitGame()
     {
         Application.Quit();
