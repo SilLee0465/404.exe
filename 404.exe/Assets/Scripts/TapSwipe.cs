@@ -40,6 +40,9 @@ public class TapSwipe : MonoBehaviour
     private Animator animator;
 
     public float PosTranslateDist = 5f;
+    //HaiJen added
+    PowerUpEffect pue;
+    //----------------
 
     void Start()
     {
@@ -48,6 +51,9 @@ public class TapSwipe : MonoBehaviour
             Input.simulateMouseWithTouches = false;
         }
         animator = this.GetComponent<Animator>();
+        //HaiJen added
+        pue = GetComponent<PowerUpEffect>();
+        //----------------------------------
     }
     public void CustomButtonTrigger()
     {
@@ -63,6 +69,15 @@ public class TapSwipe : MonoBehaviour
             {
                 zapCooldown += 1;
                 Instantiate(zapPrefab, new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z), Quaternion.identity);
+                //Haijen added
+                if (pue.zapBuff)
+                {
+                    Instantiate(zapPrefab, new Vector3(-0.19f, transform.position.y + 0.5f, transform.position.z), Quaternion.identity);
+                    Instantiate(zapPrefab, new Vector3(-3.19f, transform.position.y + 0.5f, transform.position.z), Quaternion.identity);
+                    Instantiate(zapPrefab, new Vector3(2.81f, transform.position.y + 0.5f, transform.position.z), Quaternion.identity);
+                }
+                //-----------------------------------------------------------------------------------------------------------------------
+                FindObjectOfType<AudioManager>().Play("ZapEffect");
             }
             else
             {
@@ -124,6 +139,7 @@ public class TapSwipe : MonoBehaviour
                     }
                     //  gameObject.transform.Translate(DefaultPOS_Player.position.x - PosTranslateDist, 0, 0);
                 }
+                FindObjectOfType<AudioManager>().Play("Swipe");
             }
             else
             {

@@ -5,14 +5,21 @@ using UnityEngine;
 public class PowerUpEffect : MonoBehaviour
 {
     // Attach on Player with tag "Player"
+
     public GameObject spiderWeb;
     public float score;
     static float plusingScore = 1;
-    public bool web;
-    public float candy;
-    float candyGet = 1;
     public float mSpeed = 10f;
+    float candyGet = 1;
+
+    public bool web;
     public bool zapBuff;
+    public bool broom;
+    public bool lantern;
+    public bool fullMoon;
+    Purchase store;
+    
+    PlayerMovement player;
 
     // Start is called before the first frame update
     void Start()
@@ -20,29 +27,32 @@ public class PowerUpEffect : MonoBehaviour
         spiderWeb = GameObject.FindGameObjectWithTag("Candy Detector");
         spiderWeb.SetActive(false);
         web = false;
+        player = gameObject.GetComponent<PlayerMovement>();
+        store = GetComponent<Purchase>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.forward * mSpeed * Time.deltaTime);
-        score += plusingScore;
         if (web == true)
         {
             StartCoroutine(ActivateWeb());
         }
-        if(zapBuff == true)
+        if (zapBuff == true)
         {
             StartCoroutine(ActivateZap());
         }
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if(collision.gameObject.tag == "Candy")
+        if (broom == true)
         {
-            candy += candyGet;
-            Destroy(collision.gameObject);
+            StartCoroutine(ActivateBroomstick());
+        }
+        if (lantern == true)
+        {
+            StartCoroutine(ActivateJackOLantern());
+        }
+        if (fullMoon == true)
+        {
+            StartCoroutine(ActivateFullMoon());
         }
     }
 
@@ -53,40 +63,63 @@ public class PowerUpEffect : MonoBehaviour
             web = true;
             Destroy(powUp.gameObject);
         }
-        if(powUp.gameObject.tag == "FullMoon")
+        if (powUp.gameObject.tag == "FullMoon")
         {
-            plusingScore = plusingScore * 2; 
+            fullMoon = true;
             Destroy(powUp.gameObject);
         }
-        if(powUp.gameObject.tag == "JackOLantern")
+        if (powUp.gameObject.tag == "JackOLantern")
         {
-            candyGet = 2; //candyCount
+            lantern = true;
             Destroy(powUp.gameObject);
         }
-        if(powUp.gameObject.tag == "Broomstick")
+        if (powUp.gameObject.tag == "Broomstick")
         {
-            mSpeed = 20f; //player speed
+            broom = true;
             Destroy(powUp.gameObject);
         }
-        if(powUp.gameObject.tag == "MagicWand")
+        if (powUp.gameObject.tag == "MagicWand")
         {
             zapBuff = true;
             Destroy(powUp.gameObject);
-            //Might need changing something in "TapSwipe.cs" which when zapBuff == true, instantiate another 2 zap at both side line
         }
+    }
+
+    IEnumerator ActivateBroomstick()
+    {
+        player.mSpeed = 40f; //player speed
+        yield return new WaitForSecondsRealtime(Purchase.broomDuration);
+        player.mSpeed = 28f;
+        broom = false;
     }
 
     IEnumerator ActivateWeb()
     {
         spiderWeb.SetActive(true);
-        yield return new WaitForSecondsRealtime(1);
+        yield return new WaitForSecondsRealtime(Purchase.webDuration);
         spiderWeb.SetActive(false);
         web = false;
     }
 
     IEnumerator ActivateZap()
     {
-        yield return new WaitForSecondsRealtime(1);
+        yield return new WaitForSecondsRealtime(Purchase.zapDuration);
         zapBuff = false;
+    }
+
+
+    IEnumerator ActivateJackOLantern()
+    {
+        candyGet = 2;
+        yield return new WaitForSecondsRealtime(Purchase.lanternDuration);
+        lantern = false;
+        candyGet = 1;
+    }
+
+    IEnumerator ActivateFullMoon()
+    {
+        plusingScore = plusingScore * 2;
+        yield return new WaitForSecondsRealtime(Purchase.moonDuration);
+        fullMoon = false;
     }
 }
