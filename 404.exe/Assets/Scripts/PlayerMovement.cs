@@ -14,19 +14,20 @@ public class PlayerMovement : MonoBehaviour
         transform.Translate(Vector3.down * 3 * Time.deltaTime);
     }
 
+    void Awake()
+    {
+        isDead = false;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         animator = this.GetComponent<Animator>();
-        isDead = false;
     }
     
     // Update is called once per frame
     void Update()
     {
-        if(!isDead)
-        {
-            PlayerRunning();
-        }
+        PlayerRunning();
     }
 }
