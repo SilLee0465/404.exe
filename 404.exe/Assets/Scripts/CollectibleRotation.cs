@@ -25,7 +25,7 @@ public class CollectibleRotation : MonoBehaviour
 
         foreach (GameObject sanitizer in sanitizer)
         {
-            sanitizer.transform.Rotate(0, speed, 0);
+            sanitizer.transform.Rotate(0, 0, speed);
         }
     }
 }
