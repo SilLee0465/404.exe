@@ -10,6 +10,10 @@ TagManager:
   - Candy Detector
   - SpiderWeb
   - Floor
+  - FullMoon
+  - JackOLantern
+  - Broomstick
+  - MagicWand
   layers:
   - Default
   - TransparentFX
