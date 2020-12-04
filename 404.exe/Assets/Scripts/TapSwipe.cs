@@ -29,6 +29,7 @@ public class TapSwipe : MonoBehaviour
     public float distanceBetweenLanes;
 
     public float DoubleTapDelta = 0.5f;
+    public float shrinkTime;
     private float LastTappedTime;
 
     private Vector3 InitialPos;
@@ -38,6 +39,8 @@ public class TapSwipe : MonoBehaviour
     private float LastSwipedTime;
 
     private Animator animator;
+
+    private PlayerMovement _PlayerMovement;
 
     public float PosTranslateDist = 5f;
     //HaiJen added
@@ -50,19 +53,15 @@ public class TapSwipe : MonoBehaviour
         {
             Input.simulateMouseWithTouches = false;
         }
+        _PlayerMovement = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
         animator = this.GetComponent<Animator>();
         //HaiJen added
         pue = GetComponent<PowerUpEffect>();
         //----------------------------------
+        Time.timeScale = 1;
     }
     public void CustomButtonTrigger()
     {
-        if (Tap == true)
-        {
-            
-
-        }
-
         if (DoubleTap == true)
         {
             if (zapCooldown == 0)
@@ -79,11 +78,6 @@ public class TapSwipe : MonoBehaviour
                 //-----------------------------------------------------------------------------------------------------------------------
                 FindObjectOfType<AudioManager>().Play("ZapEffect");
             }
-            else
-            {
-
-            }
-
         }
 
     }
@@ -103,7 +97,10 @@ public class TapSwipe : MonoBehaviour
                     if (curLane != 3)
                     {
                         curLane += 1;
+                        animator.SetBool("rightTurn", true);
+                        animator.SetBool("leftTurn", false);
                         transform.Translate(Vector3.left * distanceBetweenLanes);
+                        StartCoroutine(rightCancel());
                     }
                     else
                     {
@@ -113,7 +110,7 @@ public class TapSwipe : MonoBehaviour
                         }
                         else
                         {
-                            animator.SetBool("dead", true);
+                            _PlayerMovement.isDead = true;
                         }
                     }
 
@@ -124,7 +121,10 @@ public class TapSwipe : MonoBehaviour
                     if (curLane != 1)
                     {
                         transform.Translate(Vector3.right * distanceBetweenLanes);
+                        animator.SetBool("leftTurn", true);
+                        animator.SetBool("rightTurn", false);
                         curLane -= 1;
+                        StartCoroutine(leftCancel());
                     }
                     else
                     {
@@ -134,7 +134,7 @@ public class TapSwipe : MonoBehaviour
                         }
                         else
                         {
-                            animator.SetBool("dead", true);
+                            _PlayerMovement.isDead = true;
                         }
                     }
                     //  gameObject.transform.Translate(DefaultPOS_Player.position.x - PosTranslateDist, 0, 0);
@@ -153,9 +153,8 @@ public class TapSwipe : MonoBehaviour
                         jumping = true;
 
                         StartCoroutine(jumpDown(jumpTime - 0.1f));
-
                         animator.SetBool("jumping", true);
-                        gameObject.transform.Translate(Vector3.up * jumpForce);
+                        //gameObject.transform.Translate(Vector3.up * jumpForce);
                     }
 
                 }
@@ -163,6 +162,10 @@ public class TapSwipe : MonoBehaviour
                 {
                     Debug.Log("DOWN");
                     animator.SetBool("sliding", true);
+                    if (jumping)
+                    {
+                        jumping = false;
+                    }
                     transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
                     sliding = true;
                     StartCoroutine(slideCancel());
@@ -170,18 +173,29 @@ public class TapSwipe : MonoBehaviour
             }
         }
     }
-    
+
     IEnumerator slideCancel()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(shrinkTime);
         sliding = false;
         transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
         animator.SetBool("sliding", false);
     }
 
-    IEnumerator jumpDown(float delay)
+    IEnumerator rightCancel()
     {
+        yield return new WaitForSeconds(0.5f);
+        animator.SetBool("rightTurn", false);
+    }
 
+    IEnumerator leftCancel()
+    {
+        yield return new WaitForSeconds(0.5f);
+        animator.SetBool("leftTurn", false);
+    }
+
+    IEnumerator jumpDown(float delay)
+    { 
         yield return new WaitForSeconds(delay);
         jumping = false;
         animator.SetBool("jumping", false);
@@ -199,9 +213,18 @@ public class TapSwipe : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(tripped)
+        if (tripped)
         {
-            StartCoroutine(tripRecover(tripRecoveryTime)) ;
+            StartCoroutine(tripRecover(tripRecoveryTime));
+        }
+        if (jumping)
+        {
+            transform.Translate(Vector3.up * jumpForce);
+        }
+
+        if (sliding)
+        {
+            transform.Translate(Vector3.down * 2 *  Time.deltaTime);
         }
 
         if (zapCooldown > 0)
@@ -234,7 +257,7 @@ public class TapSwipe : MonoBehaviour
             float currRange = Vector3.SqrMagnitude(EndPos);
             if (EndPos != Vector3.zero && currRange > Deadzone)
             {
-                
+
 
             }
         }
@@ -246,7 +269,7 @@ public class TapSwipe : MonoBehaviour
             {
                 if (Time.time - LastSwipedTime < SwipeDelta)
                 {
-                    
+
                     SwipeDirection(EndPos);
                 }
 
